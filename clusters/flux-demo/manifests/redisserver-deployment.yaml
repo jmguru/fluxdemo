@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.32.0 (765fde254)
+  labels:
+    io.kompose.service: redisserver
+  name: redisserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: redisserver
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.32.0 (765fde254)
+      labels:
+        io.kompose.network/k8-nodeapp-default: "true"
+        io.kompose.service: redisserver
+    spec:
+      containers:
+        - image: jmguru/k8-nodeapp-redisserver:latest
+          name: redisserver
+          ports:
+            - containerPort: 6379
+              hostPort: 6379
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data
+              name: redisserver-claim0
+      restartPolicy: Always
+      imagePullSecrets:
+      - name: regcred
+      volumes:
+        - name: redisserver-claim0
+          persistentVolumeClaim:
+            claimName: redisserver-claim0
